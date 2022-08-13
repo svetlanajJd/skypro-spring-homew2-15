@@ -6,8 +6,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class SkyproSpringHomew215Application {
 
-	public static void main(String[] args) {
-		SpringApplication.run(SkyproSpringHomew215Application.class, args);
-	}
-
+    public static void main(String[] args) {
+        SpringApplication.run(SkyproSpringHomew215Application.class, args);
+        ListImpl listImpl = new ListImpl(new Integer[100_000]);
+        listImpl.method();
+    }
 }
