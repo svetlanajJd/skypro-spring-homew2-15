@@ -8,17 +8,16 @@ import static java.util.Arrays.sort;
 public class ListImpl implements IntegerList {
 
     private Integer[] list;
+    private Integer[] array;
 
     public ListImpl(Integer[] list) {
         this.list = list;
     }
 
-//    Integer[] arr = new Integer[100_000];
-
-
     @Override
     public Integer add(Integer item) {
         Integer[] listCopy;
+        int count = 0;
         if (item == null) {
             throw new ListIndexException();
         } else {
@@ -29,10 +28,17 @@ public class ListImpl implements IntegerList {
                 } else {
                     listCopy = Arrays.copyOf(list, list.length + 1);
                     listCopy[list.length] = item;
+                    for (int k = 0; k < listCopy.length - 1; k++)
+                        if (listCopy[k] != 0) {
+                            count++;
+                        }
+                    if (count == listCopy.length) {
+                        grow();
+                    }
                 }
             }
-            return item;
         }
+        return item;
     }
 
     @Override
@@ -41,14 +47,28 @@ public class ListImpl implements IntegerList {
         if (index > list.length - 1 || item == null) {
             throw new ListIndexException();
         } else
-            for (int i = 0; i < index + 1; i++) {
-                list[index] = item;
-                listCopy[i] = list[i];
-                for (int j = index + 1; j < list.length; j++) {
-                    listCopy[j] = list[j - 1];
-                }
+            list[index] = item;
+        for (int i = 0; i < index + 1; i++) {
+            listCopy[i] = list[i];
+            for (int j = index + 1; j < list.length; j++) {
+                listCopy[j] = list[j - 1];
             }
-        return listCopy[index];
+        }
+        for (int k = 0; k < listCopy.length; k++) {
+            list[k] = listCopy[k];
+            if (list[k] != null) {
+                grow();
+            }
+        }
+        return list[index];
+    }
+
+    private void grow() {
+        int newLength = (int) (list.length * 1.5);
+        array = new Integer[newLength];
+        for (int i = 0; i < list.length; i++) {
+            array[i] = list[i];
+        }
     }
 
     @Override
@@ -96,7 +116,6 @@ public class ListImpl implements IntegerList {
                     }
                     break;
                 }
-
             }
         }
         list = listCopy;
@@ -200,39 +219,50 @@ public class ListImpl implements IntegerList {
         return Arrays.hashCode(list);
     }
 
-
     private static Integer random() {
         Random random = new Random();
         int randomNum = random.nextInt();
         return randomNum;
     }
 
-    private static void swapElements(Integer[] arr, int indexA, int indexB) {
-        Integer tmp = arr[indexA];
-        arr[indexA] = arr[indexB];
-        arr[indexB] = tmp;
+    private static void swapElements(Integer[] arr, int left, int right) {
+        int temp = arr[left];
+        arr[left] = arr[right];
+        arr[right] = temp;
     }
 
-    private void sortSelection(Integer[] arr) {
+    private void sortSelection(Integer[] arr, int begin, int end) {
         arr = new Integer[100_000];
-        for (int m = 0; m < arr.length; m++) {
+        for (int m = 0; m < arr.length - 1; m++) {
             arr[m] = random();
         }
-        for (int i = 0; i < arr.length - 1; i++) {
-            int minElementIndex = i;
-            for (int j = i + 1; j < arr.length; j++) {
-                if (arr[j] < arr[minElementIndex]) {
-                    minElementIndex = j;
-                }
-            }
-            swapElements(arr, i, minElementIndex);
+        if (begin < end) {
+            int partitionIndex = partition(arr, begin, end);
+
+            sortSelection(arr, begin, partitionIndex - 1);
+            sortSelection(arr, partitionIndex + 1, end);
         }
     }
+
+    private static int partition(Integer[] arr, int begin, int end) {
+        int pivot = arr[end];
+        int i = (begin - 1);
+
+        for (int j = begin; j < end; j++) {
+            if (arr[j] <= pivot) {
+                i++;
+
+                swapElements(arr, i, j);
+            }
+        }
+        swapElements(arr, i + 1, end);
+        return i + 1;
+    }
+
 
     private boolean binarySearch(Integer[] arr, Integer item) {
         int min = 0;
         int max = arr.length - 1;
-
         while (min <= max) {
             int mid = (min + max) / 2;
             if (item == arr[mid]) {
@@ -247,11 +277,16 @@ public class ListImpl implements IntegerList {
         return false;
     }
 
-    public void method() {
-        Integer[] arr = new Integer[100_000];
-        sortSelection(arr);
-        long start = System.currentTimeMillis();
-        sortSelection(arr);
-        System.out.println(System.currentTimeMillis() - start);
-    }
+//    public void method() {
+//        Integer[] arr = new Integer[100_000];
+//        for (int m = 0; m < arr.length; m++) {
+//            arr[m] = random();
+//        }
+//        sortSelection(arr, 0, arr.length - 1);
+//        long start = System.currentTimeMillis();
+//        sortSelection(arr, 0, arr.length - 1);
+//        System.out.println(System.currentTimeMillis() - start);
+//
+//    }
+
 }
